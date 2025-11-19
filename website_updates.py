@@ -4,10 +4,10 @@ from notification_class import notification
 import config
 
 consumer = KafkaConsumer(
-    "BBill Processed",
+    "Bill Action Retreived",
     bootstrap_servers=config.KAFKA_SERVER,
     auto_offset_reset="earliest",
-    group_id="Notification_Handler_1",
+    group_id="website_updates_1",
     value_deserializer=lambda v: json.loads(v.decode("utf-8"))
 )
 producer = KafkaProducer(
@@ -16,13 +16,7 @@ producer = KafkaProducer(
 )
 
 for msg in consumer:
-    data = msg.value
-    users = ["me"]#retreive all users to whom this applies
-    for user in users:
-        send_data = {
-            "guid": data["guid"],
-            "user": user,
-            "notification_vector": ["email"],
-            "email": "lucasjamesnavarro@gmail.com"
-        }
-        producer.send("Notification Prepared", send_data)
+    #update the website
+    pass
+    
+

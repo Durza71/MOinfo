@@ -4,12 +4,13 @@ from notification_class import notification
 import config
 
 consumer = KafkaConsumer(
-    "BBill Processed",
+    "bill_information_stale",
     bootstrap_servers=config.KAFKA_SERVER,
     auto_offset_reset="earliest",
-    group_id="Notification_Handler_1",
+    group_id="missouri_senate",
     value_deserializer=lambda v: json.loads(v.decode("utf-8"))
 )
+
 producer = KafkaProducer(
     bootstrap_servers=config.KAFKA_SERVER,
     value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
@@ -17,12 +18,12 @@ producer = KafkaProducer(
 
 for msg in consumer:
     data = msg.value
-    users = ["me"]#retreive all users to whom this applies
-    for user in users:
-        send_data = {
-            "guid": data["guid"],
-            "user": user,
-            "notification_vector": ["email"],
-            "email": "lucasjamesnavarro@gmail.com"
-        }
-        producer.send("Notification Prepared", send_data)
+    bill_name = data["short_title"]
+    #If not in database add bill to database
+    #create the bill action and add importance. 
+    #Create a notification with the proper fields
+    print(bill_name + " processed")
+    send_data = {
+        "guid": data["last_action_guid"],
+    }
+    producer.send("Bill Processed", send_data)

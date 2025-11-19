@@ -1,4 +1,6 @@
 from notification_class import notification
+import requests 
+import xml.etree.ElementTree as ET
 
 def get_xml_data(link: str):
     data = requests.get(link)

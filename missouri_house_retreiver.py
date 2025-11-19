@@ -16,7 +16,7 @@ consumer = KafkaConsumer(
 producer = KafkaProducer(
     bootstrap_servers=config.KAFKA_SERVER,
     value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
-    )
+)
 
 HOUSE_BILLS_LINK = "https://documents.house.mo.gov/xml/251-BillList.XML"
 
@@ -49,11 +49,33 @@ def get_house_bills(last_ran: str, current_time: str = "today") -> [notification
 
         msg = "Update on Bill " + bill_string + " " + title + " - " + description + " - " + last_action[ACTION]
         Notifications.append(notification(msg))
+        #TODO Finish all fields
+        #TODO Deal with multiple actions in a day
+        action_data = {
+            "number": "PLACEHOLDER",
+            "string":bill_string,
+            "short_title": title,
+            "long_title": "PLACEHOLDER",
+            "description": description,
+            "last_action": last_action[ACTION],
+            "last_action_guid": "PLACEHOLDER",
+            "last_action_pub_date": "PLACEHOLDER",
+            "last_action_activity_sequence": "PLACEHOLDER",
+            "next_house_hearing": "PLACEHOLDER",
+            "sponsor": "PLACEHOLDER",
+            "bill_text": "PLACEHOLDER", #Bill text and bill summaries are pdfs 
+            "bill_summary": "PLACEHOLDER",
+            "link": bill[BILL_LINK].text,
+            "subjects": ["PLACEHOLDER"] #Bills have some predefined Categories
+        }
+        #Send all relevant bill data to the action processor
+        producer.send("Bill Action Retreived", action_data)
     
     return Notifications
 
 for msg in consumer:
+    data = msg.value
     print("Getting Bills from Missouri House of Representatives...")
-    get_house_bills(msg.fetch_start, msg.fetch_end)
+    #get_house_bills(data["fetch_start"], data["fetch_end"])
     print("Bills Fetched from Missouri House of Representatives...")
 
