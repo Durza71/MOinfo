@@ -35,8 +35,8 @@ def start_application(target: datetime):
 
             producer.send("bill_information_stale", data)
 
-            print("Next Updates on " + target.strftime("%m/%d/%Y %HH:/%MM"))
+            print("Next Updates on " + target.strftime("%m/%d/%Y %H:%M"))
         print(get_formatted_time())
-        time.sleep(1)
+        time.sleep(10)
 
 start_application(datetime.now())
