@@ -23,7 +23,7 @@ import os
 from notification_class import notification
 from kafka import KafkaConsumer, KafkaProducer
 import json
-import config
+import config.servers as config
 
 consumer = KafkaConsumer(
     "notification_prepared",

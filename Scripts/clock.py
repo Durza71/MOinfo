@@ -2,7 +2,7 @@ from kafka import KafkaProducer
 from datetime import datetime, timedelta
 import json
 import time
-import config
+import config.servers as config
 
 def get_formatted_date():
     now = datetime.now()

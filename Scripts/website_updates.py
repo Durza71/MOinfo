@@ -1,7 +1,7 @@
 from kafka import KafkaConsumer, KafkaProducer
 import json
 from notification_class import notification
-import config
+import config.servers as config
 
 consumer = KafkaConsumer(
     "bill_version_retreived",
