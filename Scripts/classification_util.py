@@ -1,6 +1,6 @@
 from classification_models.predict import predict_more_likely_than_p
 from classification_models.models import bill_classificiation_tfidf_model
-from config import POLICY_AREA_CERTAINTY
+from config.training import POLICY_AREA_CERTAINTY
 
 
 #Adds bill classes to sql_session

@@ -4,15 +4,15 @@ from xml_unpacker import get_xml_data
 import requests
 from notification_class import notification
 import xml.etree.ElementTree as ET
-import config
-from session import engine
+import config.servers as config
+from database.session import engine
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from tables.bills import Bill, Sponsored_By, Bill_Version, get_bill, get_version
-from tables.bill_actions import Bill_Action, get_action, get_guid_prefix
-from tables.government_names import govt_names
+from database.tables.bills import Bill, Sponsored_By, Bill_Version, get_bill, get_version
+from database.tables.bill_actions import Bill_Action, get_action, get_guid_prefix
+from database.tables.government_names import govt_names
 from datetime import datetime
-from tables.person import get_person_by_name
+from database.tables.person import get_person_by_name
 from pdf_util import extract_from_pdf
 from classification_util import classify_bill
 

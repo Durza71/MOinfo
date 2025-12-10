@@ -3,7 +3,7 @@ import json
 import requests
 from notification_class import notification
 from bs4 import BeautifulSoup
-import config
+import config.config as config
 
 consumer = KafkaConsumer(
     "bill_information_stale",

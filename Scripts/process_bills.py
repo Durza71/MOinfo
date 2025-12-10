@@ -3,7 +3,7 @@ import json
 from notification_class import notification
 from tables.bill_actions import Bill_Action
 from tables.bills import Bill
-import config
+import config.config as config
 from session import engine
 from sqlalchemy.orm import Session
 
