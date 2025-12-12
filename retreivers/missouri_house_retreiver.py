@@ -26,6 +26,7 @@ producer = KafkaProducer(
 )
 
 HOUSE_BILLS_LINK = "https://documents.house.mo.gov/xml/251-BillList.XML"
+
 UPDATED = 5
 BILL_LINK = 4
 SESSION_CODE = 3
@@ -44,6 +45,7 @@ def extract_part(url: str) -> str:
 
 def get_house_bills(last_ran: str):
     bills = get_xml_data(HOUSE_BILLS_LINK)
+
     with Session(engine) as session:
         for bill in bills:
             #Check if bill exists in database
@@ -51,11 +53,11 @@ def get_house_bills(last_ran: str):
             bill_id = extract_part(bill[BILL_LINK].text)
 
             data = fetch_bill_data(bill)
-
             if(data == None):
                 continue
 
             titles = data.find("Title")
+
             try:
                 short_title = titles.find("ShortTitle").text
             except:
@@ -69,7 +71,8 @@ def get_house_bills(last_ran: str):
                 long_title = ""
         
 
-            bill_fields = {"chamber":govt_names.MO_LOWER_HOUSE_NAME,
+            bill_fields = {
+                    "chamber":govt_names.MO_LOWER_HOUSE_NAME,
                     "under":govt_names.MO_GOVERNMENT_NAME,
                     "session":bill_session,
                     "id":data.find("BillNumber").text,
@@ -81,7 +84,6 @@ def get_house_bills(last_ran: str):
             bill_sql = update_bill(session, **bill_fields)
 
             update_versions(session, data, bill_sql)
-
             update_actions(session, data.findall("Action"), bill_sql)
 
             print("Bill " + bill_id + " processed")
@@ -91,6 +93,7 @@ def get_house_bills(last_ran: str):
 
 def add_sponsors(session, data, bill_id, bill_session):
     sponsors = data.find("Sponsor")
+
     for sponsor in sponsors:
         Sponsored_By(
             bill_chamber=govt_names.MO_LOWER_HOUSE_NAME,
@@ -98,26 +101,34 @@ def add_sponsors(session, data, bill_id, bill_session):
             bill_session=bill_session,
             bill_id=bill_id,
             type=sponsor.find("SponsorType").text,
-            id=get_person_by_name(session, sponsor.find("FullName").text, govt_names.MO_LOWER_HOUSE_NAME, govt_names.MO_GOVERNMENT_NAME)
+            id=get_person_by_name(
+                session, 
+                sponsor.find("FullName").text, 
+                govt_names.MO_LOWER_HOUSE_NAME, 
+                govt_names.MO_GOVERNMENT_NAME
+            )
         )
 
 def fetch_bill_data(bill):
-    data = requests.get(bill[BILL_LINK].text)
-    if(str(data) != "<Response [200]>"):
-        #log
+    response = requests.get(bill[BILL_LINK].text)
+    if(str(response) != "<Response [200]>"):
         print("Error fetching data from " + bill[BILL_LINK].text)
-        #print(str(data))
-    #log
     else:
         print("Data fetched from " + bill[BILL_LINK].text)
-        return ET.fromstring(data.text)[0]
+        return ET.fromstring(response.text)[0]
 
 
 
 def update_actions(sql_session, actions, sql_bill):
-
     for action in actions:
-        guid = int(str(get_guid_prefix(govt_names.US_GOVERNMENT_NAME, govt_names.MO_GOVERNMENT_NAME, govt_names.MO_GOVERNMENT_NAME, govt_names.MO_LOWER_HOUSE_NAME)) + str(action.find("Guid").text))
+        guid_prefix = get_guid_prefix(
+            govt_names.US_GOVERNMENT_NAME, 
+            govt_names.MO_GOVERNMENT_NAME, 
+            govt_names.MO_GOVERNMENT_NAME, 
+            govt_names.MO_LOWER_HOUSE_NAME
+        )
+        
+        guid = int(str(guid_prefix) + str(action.find("Guid").text))
 
         old_action = get_action(sql_session, guid)
 
@@ -143,11 +154,10 @@ def update_versions(sql_session, bill, bill_sql):
     texts = bill.findall("BillText")
     summaries = bill.findall("BillSummary")
     
-    #assert len(texts) == len(summaries), "Not every text has a summary for a bill"
-
     indexed_summaries = []
     for summary in summaries:
         indexed_summaries.append((summary, summary.find("BillVersionSort").text))
+    
     for text in texts:
         version = int(text.find("BillVersionSort").text)
         text_link = text.find("BillTextLink").text
@@ -157,7 +167,16 @@ def update_versions(sql_session, bill, bill_sql):
             if s[1] == version:
                 summary_link = s[0].find("SummaryTextLink").text
         
-        if(None != get_version(sql_session, govt_names.MO_LOWER_HOUSE_NAME, govt_names.MO_GOVERNMENT_NAME, bill_sql.session, bill_sql.id, version)):
+        existing = get_version(
+            sql_session,
+            govt_names.MO_LOWER_HOUSE_NAME,
+            govt_names.MO_GOVERNMENT_NAME,
+            bill_sql.session,
+            bill_sql.id,
+            version
+        )
+
+        if existing is not None:
             continue
         
         bill_version = {
@@ -174,7 +193,9 @@ def update_versions(sql_session, bill, bill_sql):
 
         bv = Bill_Version(bill = bill_sql, **bill_version)
         sql_session.add(bv)
+
         classify_bill(sql_session, bv)
+        
         sql_session.commit()
         producer.send("bill_version_retreived", bill_version)
 

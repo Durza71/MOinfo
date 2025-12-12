@@ -20,6 +20,7 @@ def get_version(session, chamber, under, session_num, bill_id, version):
     return version
 
 def update_bill(sql_session, **fields):
+    #Probably shouldn't be using assert here
     assert "chamber" in fields
     assert "under" in fields
     assert "session" in fields
@@ -88,6 +89,9 @@ class Bill(Base):
                 number = v.version
                 version = v
         return version
+    
+    def get_last_action(self):
+        return self.actions[-1]
 
 class Sponsored_By(Base):
     __tablename__ = "sponsored_by"

@@ -37,7 +37,7 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
 )
 
-def send_email(email_address: str, bill_notification: str, df: pd.DataFrame = None) -> bool:
+def send_email(email_address: str, bill_notification: str, sender_email, sender_password, df: pd.DataFrame = None) -> bool:
     """
     Sends an email containing the notification message and optionally attaches a DataFrame as CSV.
 
@@ -49,8 +49,6 @@ def send_email(email_address: str, bill_notification: str, df: pd.DataFrame = No
     Returns:
         bool: True if the email was sent successfully, False otherwise.
     """
-    sender_email = EMAIL_ADDRESS
-    sender_password = EMAIL_PASSWORD
 
     msg = EmailMessage()
     msg["Subject"] = "Notification"
@@ -63,9 +61,6 @@ def send_email(email_address: str, bill_notification: str, df: pd.DataFrame = No
         csv_buffer = StringIO()
         df.to_csv(csv_buffer, index=False)
         msg.add_attachment(csv_buffer.getvalue(), subtype="csv", filename="bills.csv")
-
-    print(sender_email)
-    print(sender_password)
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
@@ -100,5 +95,5 @@ counter = 0
 for msg in consumer:
     if counter < 1:
         data = msg.value
-        send_email(data["email"], data["content"])
+        send_email(data["email"], data["content"], EMAIL_ADDRESS, EMAIL_PASSWORD)
         counter +=1
