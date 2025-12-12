@@ -7,6 +7,7 @@ from database.tables.bill_actions import Bill_Action
 from database.tables.user import User_Preference
 from database.tables.notifications import Notification
 from sqlalchemy import select
+from config.servers import FLASK_SERVER
 
 consumer = KafkaConsumer(
     "bill_action_retreived",
@@ -40,6 +41,15 @@ for msg in consumer:
         for pref in preferences:
             users.add(pref.user)
 
+        subject = bill_version.bill_chamber + " " + bill_version.bill_id + " - " + action.description
+
+        bill_link = FLASK_SERVER + f"/bills/{bill_version.bill_chamber}/{bill_version.bill_session}/{bill_version.bill_id}"
+        content = f"\n\n" \
+        f"{bill_version.bill_id} was {action.description} in the {bill_version.bill_chamber}." \
+        f"Go to {bill_link} to learn more.\n\n" \
+        "Thank you,\n" \
+        "MOinfo"
+
         for user in users:
             notification_base = {
                 "action_guid" : action.guid,
@@ -50,10 +60,10 @@ for msg in consumer:
             }
             #Content needs to have an actual message that can be send as a reasonable email
             if(user.email_notifications):
-                producer.send("email_notification_prepared", {"email": user.email, "content": "Something Happened"})
+                producer.send("email_notification_prepared", {"email": user.email, "subject" : subject, "content": user.username + content})
                 session.add(Notification(**notification_base, sent_by="email"))
 
             if(user.phone_notifications):
-                producer.send("phone_notification_prepared", {"phone": user.phone, "content": "Something Happened"})
+                producer.send("phone_notification_prepared", {"phone": user.phone, "content": user.username + content})
                 session.add(Notification(**notification_base, sent_by="phone"))
         session.commit()
