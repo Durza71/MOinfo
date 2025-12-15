@@ -117,19 +117,19 @@ def set_preference(session, username, policy_area, importance):
     session.commit()
 
 def preference_exists(session, username, policy_area):
-    if(not verify_user(session, username)):
+    if(not user_exists(session, username)):
         raise Errors.USER_NOT_FOUND_ERROR
     if session.get(User_Preference, (username, policy_area)):
         return True
     return False
 
 def get_preference(session, username, policy_area):
-    if(not verify_user(session, username)):
+    if(not user_exists(session, username)):
         raise Errors.USER_NOT_FOUND_ERROR
     return session.get(User_Preference, (username, policy_area))
 
 def get_preferences(session, username):
-    if(not verify_user(session, username)):
+    if(not user_exists(session, username)):
         raise Errors.USER_NOT_FOUND_ERROR
     return session.get(User, username).preferences
 

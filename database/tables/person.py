@@ -9,7 +9,7 @@ def get_person(session, id):
 def get_person_by_name(session, name, chamber, under):
     stmt = select(Person).where(Person.name == name)
     results = session.scalars(stmt).all()
-    if(len(results == 1)):
+    if(len(results) == 1):
         return results[0]
     elif(len(results) > 1):
         canidates = []

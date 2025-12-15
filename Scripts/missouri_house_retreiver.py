@@ -1,4 +1,4 @@
-from kafka import KafkaConsumer, KafkaProducer
+from kafka_server import KafkaConsumer, KafkaProducer
 import json
 from utils.xml_unpacker import get_xml_data
 import requests

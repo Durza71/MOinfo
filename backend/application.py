@@ -12,9 +12,8 @@ services = [
     "Scripts/website_updates.py",
 ]
 
-processes = []
-
 def start_all():
+    processes = []
     print("Starting Kafka services...")
 
     for service in services:
@@ -28,7 +27,9 @@ def start_all():
 
     print(f"{len(processes)} services started.\n")
 
-def monitor_processes():
+    return processes
+
+def monitor_processes(processes):
     print("Monitoring processes (Ctrl+C to exit)...")
 
     try:
@@ -46,8 +47,8 @@ def monitor_processes():
         print("All consumers stopped.")
 
 if __name__ == "__main__":
-    start_all()
-    monitor_processes()
+    processes = start_all()
+    monitor_processes(processes)
     
 
 

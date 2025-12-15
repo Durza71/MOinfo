@@ -16,18 +16,17 @@ consumer = KafkaConsumer(
     group_id="notification_handler_1",
     value_deserializer=lambda v: json.loads(v.decode("utf-8"))
 )
-producer = KafkaProducer(
+kafka_producer = KafkaProducer(
     bootstrap_servers=config.KAFKA_SERVER,
     value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
 )
 
-for msg in consumer:
-    data = msg.value
-    with Session(engine) as session:
-        action = session.get(Bill_Action, (data["guid"]))
+def parse_notifications(guid, session, producer):
+    
+        action = session.get(Bill_Action, (guid))
         if(action == None):
-            print("No action found with guid "+ str(data["guid"]))
-            break
+            print("No action found with guid "+ str(guid))
+            return
         bill_version = action.bill.get_newest_version()
         policy_areas = []
         for policy_area in bill_version.policy_areas:
@@ -67,3 +66,13 @@ for msg in consumer:
                 producer.send("phone_notification_prepared", {"phone": user.phone, "content": user.username + content})
                 session.add(Notification(**notification_base, sent_by="phone"))
         session.commit()
+
+def listen():
+    for msg in consumer:
+        data = msg.value
+        with Session(engine) as session:
+            parse_notifications(data["guid"], session, kafka_producer)
+        
+
+def __main__():
+    listen()

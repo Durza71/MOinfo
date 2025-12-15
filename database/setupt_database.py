@@ -41,7 +41,7 @@ def setup_missouri(session):
     session.add(mo_gov)
 
 
-if __name__ == "__main__":
+def main():
     file_path = DATABASE_LOCATION
 
     if os.path.exists(file_path):
@@ -57,3 +57,6 @@ if __name__ == "__main__":
         set_preference(session, "JohnnyTest", "Economics and Public Finance", 1)
 
         session.commit()
+
+if __name__ == "__main__":
+    main()

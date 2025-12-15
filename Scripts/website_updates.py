@@ -1,4 +1,4 @@
-from kafka import KafkaConsumer, KafkaProducer
+from kafka_server import KafkaConsumer, KafkaProducer
 import json
 from notification_class import notification
 import config.servers as config
