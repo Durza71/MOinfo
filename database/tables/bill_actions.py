@@ -65,11 +65,11 @@ def get_guid_prefix(name_1=govt_names.US_GOVERNMENT_NAME,
                                 case _:
                                     code += "000"
                         case _ :
-                            code += "000"
+                            code += "000" * 2
                 case _ :
-                    code += "000"
+                    code += "000" * 3
         case _ :
-            code += "000"
+            code += "000" * 4
 
     return int(code)
 def get_action(session, guid):

@@ -12,6 +12,7 @@ def get_formatted_time():
     now = datetime.now()
     return now.strftime("%m/%d/%Y %H:%M")
 
+#When rewritten needs a test rewrite too
 def get_last_pulled():
     return "7/11/2025"
 
@@ -38,4 +39,5 @@ def start_application(target: datetime):
         print(get_formatted_time())
         time.sleep(10)
 
-start_application(datetime.now())
+if __name__ == "__main__":
+    start_application(datetime.now())

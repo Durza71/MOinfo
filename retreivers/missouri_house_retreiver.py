@@ -13,18 +13,6 @@ from database.tables.person import get_person_by_name
 from utils.pdf_util import extract_from_pdf
 from classification_models.classification_util import classify_bill
 
-consumer = KafkaConsumer(
-    "bill_information_stale",
-    bootstrap_servers=config.KAFKA_SERVER,
-    auto_offset_reset="earliest",
-    group_id="missouri_house",
-    value_deserializer=lambda v: json.loads(v.decode("utf-8"))
-)
-producer = KafkaProducer(
-    bootstrap_servers=config.KAFKA_SERVER,
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
-)
-
 HOUSE_BILLS_LINK = "https://documents.house.mo.gov/xml/251-BillList.XML"
 
 UPDATED = 5
@@ -43,7 +31,7 @@ def extract_part(url: str) -> str:
     # Split on '-' and take the second part
     return name_without_ext.split('-', 1)[-1]
 
-def get_house_bills(last_ran: str):
+def get_house_bills(producer):
     bills = get_xml_data(HOUSE_BILLS_LINK)
 
     with Session(engine) as session:
@@ -83,8 +71,8 @@ def get_house_bills(last_ran: str):
 
             bill_sql = update_bill(session, **bill_fields)
 
-            update_versions(session, data, bill_sql)
-            update_actions(session, data.findall("Action"), bill_sql)
+            update_versions(session, data, bill_sql, producer)
+            update_actions(session, data.findall("Action"), bill_sql, producer)
 
             print("Bill " + bill_id + " processed")
 
@@ -119,7 +107,7 @@ def fetch_bill_data(bill):
 
 
 
-def update_actions(sql_session, actions, sql_bill):
+def update_actions(sql_session, actions, sql_bill, producer):
     for action in actions:
         guid_prefix = get_guid_prefix(
             govt_names.US_GOVERNMENT_NAME, 
@@ -150,7 +138,7 @@ def update_actions(sql_session, actions, sql_bill):
 
     return True
         
-def update_versions(sql_session, bill, bill_sql):
+def update_versions(sql_session, bill, bill_sql, producer):
     texts = bill.findall("BillText")
     summaries = bill.findall("BillSummary")
     
@@ -201,9 +189,24 @@ def update_versions(sql_session, bill, bill_sql):
 
     return True
 
-for msg in consumer:
-    data = msg.value
-    print("Getting Bills from Missouri House of Representatives...")
-    get_house_bills(data["last_pulled"])
-    print("Bills Fetched from Missouri House of Representatives...")
+def listen():
+    consumer = KafkaConsumer(
+        "bill_information_stale",
+        bootstrap_servers=config.KAFKA_SERVER,
+        auto_offset_reset="earliest",
+        group_id="missouri_house",
+        value_deserializer=lambda v: json.loads(v.decode("utf-8"))
+    )
+    producer = KafkaProducer(
+        bootstrap_servers=config.KAFKA_SERVER,
+        value_serializer=lambda v: json.dumps(v).encode("utf-8")  # serialize Python dict -> JSON bytes
+    )
+    for msg in consumer:
+        data = msg.value
+        print("Getting Bills from Missouri House of Representatives...")
+        get_house_bills(producer)
+        print("Bills Fetched from Missouri House of Representatives...")
+
+def __main__():
+    listen()
 

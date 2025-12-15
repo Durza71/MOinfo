@@ -1,4 +1,4 @@
-from kafka import KafkaConsumer, KafkaProducer
+from kafka_server import KafkaConsumer, KafkaProducer
 import json
 import requests
 from notification_class import notification

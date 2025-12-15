@@ -1,4 +1,4 @@
-from kafka.admin import KafkaAdminClient
+from kafka_server.admin import KafkaAdminClient
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092")
 

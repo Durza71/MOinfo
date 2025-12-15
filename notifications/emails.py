@@ -91,9 +91,13 @@ def send_email(email_address: str, bill_notification: str, sender_email, sender_
     for n in notifications_list:
         send_email(recipient, n)  # Sends each message individually
 '''
-counter = 0
-for msg in consumer:
-    if counter < 1:
-        data = msg.value
-        send_email(data["email"], data["content"], EMAIL_ADDRESS, EMAIL_PASSWORD)
-        counter +=1
+def listen():
+    counter = 0
+    for msg in consumer:
+        if counter < 1:
+            data = msg.value
+            send_email(data["email"], data["content"], EMAIL_ADDRESS, EMAIL_PASSWORD)
+            counter +=1
+        
+def __main__():
+    listen()
