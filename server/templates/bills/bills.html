@@ -40,6 +40,14 @@
 <head>
     <title>{{bill.chamber}} - {{bill.session}} - {{bill.id}}</title>
 </head>
+<li>
+  <a href="{{ url_for('bills.bill_page',
+                      chamber=bill.chamber,
+                      session=bill.session,
+                      bill_id=bill.id) }}">
+    {{ bill.short_title }}
+  </a>
+</li>
 <body>
     <div>
         <span>
