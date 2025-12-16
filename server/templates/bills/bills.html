@@ -1,3 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Bills</title>
+</head>
+<body>
+
+<div id="header"></div>
+
+<script>
+ fetch("/components/header.html")
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("header").innerHTML = html;
+
+      const currentPath = window.location.pathname;
+
+      document.querySelectorAll("nav a").forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+
+        // Home page
+        if (
+          (linkPath === "/index.html" && (currentPath === "/" || currentPath === "/index.html")) ||
+
+          // Bills section (anything under /bills/)
+          (linkPath.startsWith("/bills/") && currentPath.startsWith("/bills/"))
+        ) {
+          link.classList.add("active");
+
+          link.addEventListener("click", e => {
+            e.preventDefault(); // disable click
+          });
+        }
+      });
+    });
+</script>
 {% extends "base.html" %}
 {% block content %}
 <head>
@@ -56,4 +93,3 @@
     </div>
 </body>
 {% endblock %}
-

@@ -1,117 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>MOinfo Header</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    body {
-      margin: 0;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      border-bottom: 3px solid black;
-    }
-
-    /* Left navigation */
-    .nav-links a {
-      margin-right: 20px;
-      text-decoration: none;
-      font-weight: bold;
-      color: black;
-    }
-
-    /* Logo */
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .logo .mo {
-      color: #0057b8;
-    }
-
-    .logo .info {
-      color: #b0003a;
-    }
-
-    /* Right side */
-    .right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    /* Search bar */
-    .search {
-      position: relative;
-    }
-
-    .search input {
-      padding: 8px 35px 8px 12px;
-      border-radius: 25px;
-      border: 2px solid black;
-      outline: none;
-    }
-
-    .search span {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    /* User */
-    .user {
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .user span {
-      font-size: 24px;
-      display: block;
-    }
-  </style>
+  <title>Home</title>
 </head>
-
 <body>
 
-<header>
-  <!-- Left -->
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="bills/bills.html">Bills</a>
-    <a href="#">Politicians</a>
-    <a href="#">Legislature</a>
-  </div>
+<div id="header"></div>
 
-  <!-- Center -->
-  <div class="logo">
-    <span class="mo">MO</span><span class="info">info</span>
-  </div>
+<script>
+ fetch("/components/header.html")
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("header").innerHTML = html;
 
-  <!-- Right -->
-  <div class="right">
-    <div class="search">
-      <input type="text" placeholder="Search">
-      <span>🔍</span>
-    </div>
+      const currentPath = window.location.pathname;
 
-    <div class="user">
-      <span>👤</span>
-     <a href="auth/login.html">Hi User</a>
-    </div>
-  </div>
-</header>
-<!--body here-->
+      document.querySelectorAll("nav a").forEach(link => {
+        const linkPath = new URL(link.href).pathname;
+
+        // Home page
+        if (
+          (linkPath === "/index.html" && (currentPath === "/" || currentPath === "/index.html")) ||
+
+          // Bills section (anything under /bills/)
+          (linkPath.startsWith("/bills/") && currentPath.startsWith("/bills/"))
+        ) {
+          link.classList.add("active");
+
+          link.addEventListener("click", e => {
+            e.preventDefault(); // disable click
+          });
+        }
+      });
+    });
+</script>
+
+<h1>Welcome to MO info</h1>
+
 </body>
 </html>
